@@ -3,6 +3,7 @@ package com.practice.ecom.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +15,9 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    // TODO: Make this more secure
-    private static final String SECRET_KEY = "ecommerce_be";
+    @Value("${SECRET_KEY}")
+    private String secret;
+
     private static final int TOKEN_VALIDITY_DURATION = 3600 * 5; //5 hours
 
     public String getUserNameFromToken(String jwtToken){
@@ -28,7 +30,7 @@ public class JwtUtil {
     }
 
     private Claims getAllClaimsFromToken(String jwtToken){
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(jwtToken).getBody();
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(jwtToken).getBody();
     }
 
     public boolean validateToken(String jwtToken, UserDetails userDetails){
@@ -53,7 +55,7 @@ public class JwtUtil {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY_DURATION * 1000))
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+                .signWith(SignatureAlgorithm.HS512, secret)
                 .compact()
                 ;
     }
